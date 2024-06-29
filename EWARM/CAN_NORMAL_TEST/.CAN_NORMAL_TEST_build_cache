@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BuildDb>
+    <Tool>
+        <Name>linker</Name>
+        <Parent>
+            <Path>C:\Users\sam\Desktop\CAN代码\CAN_NORMAL_TEST\EWARM\CAN_NORMAL_TEST\Exe\CAN_NORMAL_TEST.out</Path>
+            <Output>
+                <Path>C:\Users\sam\Desktop\CAN代码\CAN_NORMAL_TEST\EWARM\CAN_NORMAL_TEST\List\CAN_NORMAL_TEST.map</Path>
+            </Output>
+        </Parent>
+    </Tool>
+</BuildDb>
