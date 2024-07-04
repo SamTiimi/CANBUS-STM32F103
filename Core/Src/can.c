@@ -19,7 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
-
+extern int SEGGER_RTT_printf(unsigned BufferIndex, const char * sFormat, ...);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -32,7 +32,8 @@ void MX_CAN_Init(void)
 
   hcan.Instance = CAN1;
   hcan.Init.Prescaler = 4;
-  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan.Init.Mode = CAN_MODE_NORMAL;
+  //hcan.Init.Mode = CAN_MODE_LOOPBACK;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_9TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_8TQ;
@@ -128,16 +129,17 @@ void CAN_SendMsg(uint32_t id, uint8_t *data, uint8_t len)
 	TxHeader.StdId = id;
 	TxHeader.IDE = CAN_ID_STD;
 	TxHeader.RTR = CAN_RTR_DATA;
+
   //wait until there is a free mailbox
   while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan) < 1) {
 	} 
   if(HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK)
   {
-    Error_Handler();
+   SEGGER_RTT_printf(0,"   SEND ERROR\n");
   }
   else
   {
-
+    SEGGER_RTT_printf(0,"   SEND SUCCESS\n");
   }
 }
 
@@ -163,19 +165,30 @@ uint8_t CAN_FilterInit(void)
 
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-  CAN_RxHeaderTypeDef RxHeader;
-  uint8_t RxData[8];
-  if(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  else
-  {
-    if(RxHeader.StdId == 0x123)
+    CAN_RxHeaderTypeDef RxHeader;
+    uint8_t RxData[8];
+
+    if(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
     {
-      //CAN_SendMsg(hcan, 0x123, RxData, 8);
+        Error_Handler();
     }
-  }
+    else
+    {
+        SEGGER_RTT_printf(0, "Received   ");
+        // Enhanced output with more message details
+        SEGGER_RTT_printf(0, "ID : %08x | DLC: %d | IDE: %s | Data: ",
+                          RxHeader.StdId, RxHeader.DLC,
+                          (RxHeader.IDE == CAN_ID_STD) ? "Standard" : "Extended");
+
+        // Print data bytes
+        for(uint8_t i = 0; i < RxHeader.DLC; i++)
+        {
+            SEGGER_RTT_printf(0, "%02x ", RxData[i]);
+        }
+
+        // End of the message indicator for clarity in logs
+        SEGGER_RTT_printf(0, "\n");
+    }
 }
 
 

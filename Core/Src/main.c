@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "SEGGER_RTT.h"
 
 /* USER CODE END Includes */
 
@@ -44,7 +45,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
   uint8_t CAN_SendBuf[8]={0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08};
-  uint8_t CAN_ID=0x255;
+  uint32_t CAN_ID=0x520;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,6 +90,8 @@ int main(void)
   MX_CAN_Init();
   /* USER CODE BEGIN 2 */
   CAN_Start();
+  SEGGER_RTT_Init();
+  SEGGER_RTT_printf(0,"Init...\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -98,9 +101,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    CAN_SendMsg(CAN_SendBuf,CAN_ID,8);
-    HAL_Delay(3000);
-
+   
+  
   }
   /* USER CODE END 3 */
 }
@@ -144,6 +146,30 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == GPIO_PIN_13)
+  {
+    if(HAL_GPIO_ReadPin(GPIOC,GPIO_PIN_13)==GPIO_PIN_SET)
+    {
+      HAL_Delay(10);
+      if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET)
+      {
+        SEGGER_RTT_printf(0, "Send       ");
+        SEGGER_RTT_printf(0, "ID: 0x%08X | DLC: %d | IDE: %s | Data: ",
+                          CAN_ID & 0x1FFFFFFF, 8, (CAN_ID & 0x80000000) ? "Extended" : "Standard");
+
+        for (uint8_t i = 0; i < 8; i++)
+        {
+          SEGGER_RTT_printf(0, "%02X ", CAN_SendBuf[i]);
+        }
+        // 实际发送CAN消息
+        CAN_SendMsg(CAN_ID, CAN_SendBuf, 8);
+      }
+    }
+  }
+  
+}
 
 /* USER CODE END 4 */
 

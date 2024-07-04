@@ -4,7 +4,9 @@
   },
   "workspaces": {
     "${workspaceFolder}\\EWARM\\Project.eww": {
-      "configs": {},
+      "configs": {
+        "${workspaceFolder}\\EWARM\\CAN_NORMAL_TEST.ewp": "CAN_NORMAL_TEST"
+      },
       "selected": {
         "path": "${workspaceFolder}\\EWARM\\CAN_NORMAL_TEST.ewp"
       }
